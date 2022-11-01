@@ -16,15 +16,20 @@ interface ProductProps {
     imageUrl: string;
     price: string;
     description: string;
+    defaultPriceId: string
   };
 }
 
 export default function Product({ product }: ProductProps) {
-  const { query } = useRouter();
-  const {isFallback} = useRouter()
+  // const { query } = useRouter();
+  const { isFallback } = useRouter();
 
-  if(isFallback) {
-    return <p>...Loading</p>
+  function handleBuyProduct() {
+    console.table(product.defaultPriceId)
+  }
+
+  if (isFallback) {
+    return <p>...Loading</p>;
   }
   return (
     <ProductContainer>
@@ -38,29 +43,30 @@ export default function Product({ product }: ProductProps) {
 
         <p>{product.description}</p>
 
-        <button>Comprar agora</button>
+        <button onClick={handleBuyProduct}>Comprar agora</button>
       </ProductDetails>
     </ProductContainer>
   );
 }
 
-
 export const getStaticPaths: GetStaticPaths = async () => {
   return {
     paths: [
       {
-        params: { id: 'prod_MggE1Ls95lbD5r' }
-      }
+        params: { id: "prod_MggE1Ls95lbD5r" },
+      },
     ],
-    fallback: true, // 
-  }
-}
+    fallback: true, //
+  };
+};
 
-export const getStaticProps: GetStaticProps<any, { id: string }> = async ({ params }) => {
+export const getStaticProps: GetStaticProps<any, { id: string }> = async ({
+  params,
+}) => {
   const productId = params.id;
 
   const product = await stripe.products.retrieve(productId, {
-    expand: ['default_price']
+    expand: ["default_price"],
   });
 
   const price = product.default_price as Stripe.Price;
@@ -71,13 +77,14 @@ export const getStaticProps: GetStaticProps<any, { id: string }> = async ({ para
         id: product.id,
         name: product.name,
         imageUrl: product.images[0],
-        price: new Intl.NumberFormat('pt-BR', {
-          style: 'currency',
-          currency: 'BRL'
+        price: new Intl.NumberFormat("pt-BR", {
+          style: "currency",
+          currency: "BRL",
         }).format(price.unit_amount / 100),
-        description: product.description
-      }
+        description: product.description,
+        defaultPriceId: price.id, // Id produto
+      },
     },
-    revalidate: 60 * 60 * 1 // 1 hours
-  }
-}
+    revalidate: 60 * 60 * 1, // 1 hours
+  };
+};

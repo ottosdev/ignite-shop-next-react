@@ -18,7 +18,7 @@ export const SuccessContainer = styled("main", {
     color: "$gray300",
     maxWidth: 568,
     textAlign: "center",
-    lineHeight: 1.4
+    lineHeight: 1.4,
   },
 
   a: {
@@ -27,7 +27,7 @@ export const SuccessContainer = styled("main", {
     fontSize: "1.25rem",
     color: "#00875f",
     textDecoration: "none",
-    fontWeight: 'bold',
+    fontWeight: "bold",
 
     "&:hover": {
       color: "#00b37e",
@@ -35,17 +35,28 @@ export const SuccessContainer = styled("main", {
   },
 });
 
+export const ImagesContainer = styled("section", {
+  display: "flex",
+  alignItems: "center",
+  marginBottom: "3rem",
+
+  "div + div": {
+    marginLeft: "calc(-140px / 2)",
+  },
+});
+
 export const ImageContainer = styled("div", {
-  width: "100%",
-  maxWidth: 130,
-  height: 145,
-  borderRadius: 8,
-  padding: "0.25rem",
-  background: "linear-gradient(180deg, #1ea483 0%, #7565d4 100%)",
+  width: 140,
+  height: 140,
+  background: "linear-gradient(180deg, #1ea483 0%, #7465d4 100%)",
+  boxShadow: "0px 0px 60px rgba(0, 0, 0, 0.8)",
+  borderRadius: "50%",
+  position: "relative",
+
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
-  marginTop: "4rem",
+
   img: {
     objectFit: "cover",
   },

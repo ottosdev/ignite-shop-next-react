@@ -1,0 +1,102 @@
+import * as Dialog from "@radix-ui/react-dialog";
+import Image from "next/image";
+import { X } from "phosphor-react";
+import { CartButton } from "../CartButton";
+import {
+  CartClose,
+  CartContent,
+  CartFinalization,
+  CartProduct,
+  CartProductDetails,
+  CartProductImage,
+  FinalizationDetails,
+} from "./styles";
+import { useCart } from "../../context/CartContext";
+import { useState } from "react";
+import axios from "axios";
+export function Cart() {
+  const { cartItems, removeCartItem, cartTotal } = useCart();
+
+  const cartQuantity = cartItems.length;
+
+  const formattedPrice = new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+  }).format(cartTotal);
+
+  const [isCreatingCheckoutSession, setIsCreatingCheckoutSession] =
+    useState(false);
+
+  async function handleCheckout() {
+    try {
+      setIsCreatingCheckoutSession(true);
+
+      const response = await axios.post("/api/checkout", {
+        products: cartItems,
+      });
+
+      const { checkoutUrl } = response.data;
+
+      window.location.href = checkoutUrl;
+    } catch (err) {
+      setIsCreatingCheckoutSession(false);
+      alert("Falha ao redirecionar ao checkout!");
+    }
+  }
+
+  return (
+    <Dialog.Root>
+      <Dialog.Trigger asChild>
+        <CartButton />
+      </Dialog.Trigger>
+
+      <Dialog.Portal>
+        <CartContent>
+          <CartClose>{/* <X size={24} weight="bold" /> */}</CartClose>
+
+          <h2>Sacola de compras</h2>
+          <section>
+            {cartQuantity <= 0 && <p>Parece que seu carrinho esta vazio</p>}
+
+            {cartItems.map((item) => (
+              <CartProduct key={item.id}>
+                <CartProductImage>
+                  <Image width={100} height={93} src={item.imageUrl} alt="" />
+                </CartProductImage>
+
+                <CartProductDetails>
+                  <p>{item.name}</p>
+                  <strong>{item.price}</strong>
+                  <button onClick={() => removeCartItem(item.id)}>
+                    Remover
+                  </button>
+                </CartProductDetails>
+              </CartProduct>
+            ))}
+
+            <CartFinalization>
+              <FinalizationDetails>
+                <div>
+                  <span>Quantidade</span>
+                  <p>
+                    {cartQuantity} {cartQuantity > 1 ? "itens" : "item"}
+                  </p>
+                </div>
+                <div>
+                  <span>Valor total</span>
+                  <p>{formattedPrice}</p>
+                </div>
+              </FinalizationDetails>
+              <button
+                onClick={handleCheckout}
+                disabled={isCreatingCheckoutSession || cartQuantity <= 0}
+              >
+                Finalizar Compra
+              </button>
+            </CartFinalization>
+          </section>
+        </CartContent>
+      </Dialog.Portal>
+    </Dialog.Root>
+  );
+}

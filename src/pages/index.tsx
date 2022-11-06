@@ -6,13 +6,11 @@ import { GetStaticProps } from "next";
 import Stripe from "stripe";
 import Link from "next/link";
 import Head from "next/head";
+import { CartButton } from "../components/CartButton";
+import { IProduct, useCart } from "../context/CartContext";
+import { MouseEvent } from "react";
 interface HomePorps {
-  products: {
-    id: string;
-    name: string;
-    imageUrl: string;
-    price: string;
-  }[];
+  products: IProduct[];
 }
 
 export default function Home({ products }: HomePorps) {
@@ -23,6 +21,15 @@ export default function Home({ products }: HomePorps) {
     },
   });
 
+  const { addToCart, checkIfItemAlreadyExists } = useCart();
+
+  function handleAddToCart(
+    e: MouseEvent<HTMLButtonElement>,
+    product: IProduct
+  ) {
+    e.preventDefault();
+    addToCart(product);
+  }
   return (
     <>
       <Head>
@@ -39,8 +46,16 @@ export default function Home({ products }: HomePorps) {
             <Product className="keen-slider__slide">
               <Image src={product.imageUrl} width={520} height={480} alt="" />
               <footer>
-                <strong>{product.name}</strong>
-                <span>{product.price}</span>
+                <div>
+                  <strong>{product.name}</strong>
+                  <span>{product.price}</span>
+                </div>
+                <CartButton
+                  color="green"
+                  size="large"
+                  disabled={checkIfItemAlreadyExists(product.id)}
+                  onClick={(e) => handleAddToCart(e, product)}
+                />
               </footer>
             </Product>
           </Link>
@@ -87,6 +102,8 @@ export const getStaticProps: GetStaticProps = async () => {
         style: "currency",
         currency: "BRL",
       }).format(price.unit_amount / 100),
+      numberPrice: price.unit_amount / 100,
+      defaultPriceId: price.id,
     };
   });
 
